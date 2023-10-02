@@ -96,17 +96,13 @@ int main(void) {
     bool done = false;
     ALLEGRO_EVENT event;
 
-    int up, down, left, right;
-    up = 0;
-    down = 0;
-    left = 0;
-    right = 0;
+    int direction = 0;
 
     Snake *snake = malloc(sizeof(Snake));
     Apple *apple = malloc(sizeof(Apple));
-    bodyPart body = {4, 0, 0};
+    bodyPart body = {0, 0, 0};
     QueueInterface *anInterface = snake->body.interface;
-    snake->body.interface->create(anInterface, &body)
+    snake->body.interface->create(anInterface, &body, sizeof(bodyPart));
 
     apple->xPosition = 0;
     apple->yPosition = 0;
