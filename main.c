@@ -5,13 +5,19 @@
 #include <stdlib.h>
 #include <time.h>
 #include "lib/dsa/linkedList/linkedList.h"
+#define UP 1
+#define DOWN 2
+#define LEFT 3
+#define RIGHT 4
 
-typedef struct bodyPart {
+typedef struct BodyPart {
     int direction;
-} bodyPart;
+    int x;
+    int y;
+} BodyPart;
 
 typedef struct snake {
-    Queue body;
+    Queue *body;
 } Snake;
 
 typedef struct apple {
@@ -23,30 +29,19 @@ typedef struct apple {
 
 
 
-void handle_snake_movement(Snake *s, int left, int right, int up, int down) {
-    s->x += (right - left);
-    s->y += (down - up);
-
-    if (s->x >= 960) {
-        s->x = -1;
-    }
-
-    if (s->y >= 600) {
-        s->y = 1;
-    }
-
-    if (s->x <= -15) {
-        s->x = 960;
-    }
-
-    if (s->y <= -15) {
-        s->y = 600;
-    }
+void handle_snake_movement(Snake *s, int movement) {
+   BodyPart* bp = (BodyPart *)s->body->queueInterface->deTail(s->body);
+   bp->direction = movement;
+   s->body->queueInterface->push(s->body, (void*) bp);
 }
 
 void renderSnake(Snake *s) {
-
-    al_draw_filled_rectangle(s.x, s.y, s.x + 30, s.y + 30, al_map_rgb(255, 0, 0));
+    Iterator *itr = s->body->queueInterface->createIterator(s->body);
+    while (itr->interface->hasNext(itr)) {
+        BodyPart *bp = (BodyPart*) itr->interface->current(itr);
+        al_draw_filled_rectangle(bp->x, bp->y, bp->x + 30, bp->y + 30, al_map_rgb(255, 0, 0));
+        itr->interface->next(itr);
+    }
 }
 
 void renderApple(Apple *a) {
@@ -62,7 +57,7 @@ void randApple(Apple *pApple, int x, int y) {
 
 
 void detectCollision(Apple *a, Snake *s, int x, int y) {
-    if (s->x < a->xPosition + 30 &&
+    if (s->body->queueInterface-> x < a->xPosition + 30 &&
         s->x + 30 > a->xPosition &&
         s->y < a->yPosition + 30 &&
         s->y + 30 > a->yPosition) {
@@ -122,7 +117,7 @@ int main(void) {
     while (1) {
 
         al_wait_for_event(queue, &event);
-        handle_snake_movement(&snake, left, right, up, down);
+        handle_snake_movement(&snake,movement);
 
 
 
@@ -196,8 +191,6 @@ int main(void) {
 
 
             al_clear_to_color(al_map_rgb(12, 55, 100));
-            al_draw_textf(font, al_map_rgb(255, 255, 255), 1, 1, 0, "X: %d Y: %d score: %d", snake->x, snake->y, snake->size);
-            al_draw_textf(font, al_map_rgb(255, 255, 255), 1, 10, 0, "Apple-x: %d Apple-y: %d Timer: %d", apple->xPosition, apple->yPosition, apple->timer);
             renderSnake(snake);
             renderApple(apple);
             al_flip_display();
